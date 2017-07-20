@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: kinesis-lambda
+service: lambda-consumer
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -20,6 +20,17 @@ service: kinesis-lambda
 provider:
   name: aws
   runtime: nodejs6.10
+  profile: poc-delivery
+  region: ap-southeast-1
+  stage: dev
+  deploymentBucket: salle-serverless-deployment
+  iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - sqs:*
+      # - sqs:DeleteMessage
+      # - sqs:ReceiveMessage
+    Resource: arn:
 
 # you can overwrite defaults here
 #  stage: dev
@@ -56,12 +67,12 @@ provider:
 
 functions:
   hello:
-    handler: handler.hello
+    handler: handler.consumer
     events:
       # Subscribe to SNS topic. Will run whenever an event is published.
       # But we do not want to do this, we will publish from SNS -> SQS -> Lambda
       - sns:
-          arn: arn:xxx
+          arn: arn:...
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -105,3 +116,25 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+
+# resources:
+#   Resources:
+
+#     Messages:
+#       Type: AWS::SQS::Queue
+#       Properties:
+#         QueueName: poc-delivery
+#         MessageRetentionPeriod: 1209600
+#         VisibilityTimeout: 60
+#         RedrivePolicy:
+#           deadLetterTargetArn:
+#             Fn::GetAtt:
+#             - MessagesDeadLetterQueue
+#             - Arn
+#           maxReceiveCount: 10
+
+#     MessagesDeadLetterQueue:
+#       Type: AWS::SQS::Queue
+#       Properties:
+#         QueueName: poc-delivery-dead-letter-queue
+#         MessageRetentionPeriod: 1209600
