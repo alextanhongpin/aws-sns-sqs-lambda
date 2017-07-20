@@ -1,5 +1,7 @@
 # Lambda architecture
 
+![Sample](./SNS-SQS.png)
+
 SNS -> SQS -> Lambda
 
 ## Automate the following
