@@ -1,137 +1,163 @@
-var AWS = require('aws-sdk')
-var util = require('util')
-var async = require('async')
-var fs = require('fs')
+const AWS = require('aws-sdk')
+const fs = require('fs')
+const sns = new AWS.SNS()
+const sqs = new AWS.SQS()
 
-// configure AWS
+const config = {
+  TopicArn: '',
+  QueueUrl: '',
+  QueueArn: '',
+}
+
+// Environment Variables
+const SNS_TOPIC = 'demo'
+const QUEUE_NAME = 'demo'
+const AWS_REGION = 'us-east-1'
+const AWS_PROFILE = 'YOUR-DEFAULT-PROFILE'
+
+// Configure AWS
 AWS.config.update({
-  'region': 'us-east-1'
+  region: AWS_REGION,
+  credentials: new AWS.SharedIniFileCredentials({ profile: AWS_PROFILE })
 })
 
-var sns = new AWS.SNS()
-var sqs = new AWS.SQS()
 
-var config = {}
-
-function createTopic (cb) {
-  sns.createTopic({
-    'Name': 'demo'
-  }, function (err, result) {
-    if (err !== null) {
-      console.log(util.inspect(err))
-      return cb(err)
-    }
-    console.log(util.inspect(result))
-
-    config.TopicArn = result.TopicArn
-
-    cb()
+function createTopic (config) {
+  return new Promise((resolve, reject) => { 
+    sns.createTopic({
+      Name: SNS_TOPIC
+    }, (err, result) => {
+      if (err) {
+        reject(err)
+      } else {
+        console.log('Created topic successfully:\n')
+        console.log(result)
+        config.TopicArn = result.TopicArn
+        resolve(config)
+      }
+    })
   })
 }
 
-function createQueue (cb) {
-  sqs.createQueue({
-    'QueueName': 'demo'
-  }, function (err, result) {
-    if (err !== null) {
-      console.log(util.inspect(err))
-      return cb(err)
-    }
-
-    console.log(util.inspect(result))
-
-    config.QueueUrl = result.QueueUrl
-
-    cb()
+function createQueue (config) {
+  return new Promise((resolve, reject) => {
+    sqs.createQueue({
+      QueueName: QUEUE_NAME
+    }, (err, result) => {
+      if (err) {
+        reject(err)
+      } else {
+        console.log('Created queue successfully:\n')
+        console.log(result)
+        config.QueueUrl = result.QueueUrl
+        resolve(config)
+      }
+    })
   })
 }
 
-function getQueueAttr (cb) {
-  sqs.getQueueAttributes({
-    QueueUrl: config.QueueUrl,
-    AttributeNames: ['QueueArn']
-  }, function (err, result) {
-    if (err !== null) {
-      console.log(util.inspect(err))
-      return cb(err)
-    }
-
-    console.log(util.inspect(result))
-
-    config.QueueArn = result.Attributes.QueueArn
-
-    cb()
+function getQueueAttr (config) {
+  return new Promise((resolve, reject) => {
+    sqs.getQueueAttributes({
+      QueueUrl: config.QueueUrl,
+      AttributeNames: ['QueueArn']
+    }, (err, result) => {
+      if (err) {
+        reject(err)
+      } else {
+        console.log('Got queue arn:\n')
+        console.log(result)
+        config.QueueArn = result.Attributes.QueueArn
+        resolve(config)
+      }
+    })
   })
 }
 
-function snsSubscribe (cb) {
-  sns.subscribe({
-    'TopicArn': config.TopicArn,
-    'Protocol': 'sqs',
-    'Endpoint': config.QueueArn
-  }, function (err, result) {
-    if (err !== null) {
-      console.log(util.inspect(err))
-      return cb(err)
-    }
-
-    console.log(util.inspect(result))
-
-    cb()
+function snsSubscribe (config) {
+  return new Promise((resolve, reject) => {
+    sns.subscribe({
+      TopicArn: config.TopicArn,
+      Protocol: 'sqs',
+      Endpoint: config.QueueArn
+    }, (err, result) => {
+      if (err) {
+        reject(err)
+      } else {
+        console.log('Subscribed to queue arn:\n')
+        console.log(result)
+        resolve(config)
+      }
+    })
   })
 }
 
-function setQueueAttr (cb) {
-  var queueUrl = config.QueueUrl
-  var topicArn = config.TopicArn
-  var sqsArn = config.QueueArn
+function setQueueAttr (config) {
+  const queueUrl = config.QueueUrl
+  const topicArn = config.TopicArn
+  const sqsArn = config.QueueArn
 
-  var attributes = {
-    'Version': '2008-10-17',
-    'Id': sqsArn + '/SQSDefaultPolicy',
-    'Statement': [{
-      'Sid': 'Sid' + new Date().getTime(),
-      'Effect': 'Allow',
-      'Principal': {
-        'AWS': '*'
+  const attributes = {
+    Version: '2008-10-17',
+    Id: sqsArn + '/SQSDefaultPolicy',
+    Statement: [{
+      Sid: 'Sid' + new Date().getTime(),
+      Effect: 'Allow',
+      Principal: {
+        AWS: '*'
       },
-      'Action': 'SQS:SendMessage',
-      'Resource': sqsArn,
-      'Condition': {
-        'ArnEquals': {
+      Action: 'SQS:SendMessage',
+      Resource: sqsArn,
+      Condition: {
+        ArnEquals: {
           'aws:SourceArn': topicArn
         }
       }
     }
     ]
   }
-
-  sqs.setQueueAttributes({
-    QueueUrl: queueUrl,
-    Attributes: {
-      'Policy': JSON.stringify(attributes)
-    }
-  }, function (err, result) {
-    if (err !== null) {
-      console.log(util.inspect(err))
-      return cb(err)
-    }
-
-    console.log(util.inspect(result))
-
-    cb()
+  
+  return new Promise((resolve, reject) => {
+    sqs.setQueueAttributes({
+      QueueUrl: queueUrl,
+      Attributes: {
+        Policy: JSON.stringify(attributes)
+      }
+    }, (err, result) => {
+      if (err) {
+        reject(err)
+      } else {
+        console.log('Set queue attributes:\n')
+        console.log(result)
+        resolve(config)
+      }
+    })
   })
 }
 
-function writeConfigFile (cb) {
-  fs.writeFile('config.json', JSON.stringify(config, null, 4), function (err) {
-    if (err) {
-      return cb(err)
-    }
-
-    console.log('config saved to config.json')
-    cb()
+function writeConfigFile (config) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile('config.json', JSON.stringify(config, null, 4), (err) => {
+      if (err) {
+        reject(err)
+      } else {
+        console.log('config saved to config.json')
+        resolve(true)
+      }
+    })
   })
 }
 
-async.series([createTopic, createQueue, getQueueAttr, snsSubscribe, setQueueAttr, writeConfigFile])
+Promise.resolve(config)
+.then(createTopic)
+.then(createQueue)
+.then(getQueueAttr)
+.then(snsSubscribe)
+.then(setQueueAttr)
+.then(writeConfigFile)
+.then((ok) => {
+  console.log('Done')
+})
+.catch((err) => {
+  throw err
+})
