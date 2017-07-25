@@ -1,17 +1,22 @@
 'use strict'
 
+const sqsQueueUrl = process.env.SQS_QUEUE_URL
+
 const AWS = require('aws-sdk')
 AWS.config.update({
-  region: 'ap-southeast-1',
-  credentials: new AWS.SharedIniFileCredentials({ profile: 'poc-delivery' })
+  region: 'ap-southeast-1'
+  // credentials: new AWS.SharedIniFileCredentials({ profile: 'poc-delivery' })
 })
 const sqs = new AWS.SQS({
-  apiVersion: '2012-11-05'
+  apiVersion: '2012-11-05',
+  region: 'ap-southeast-1'
 })
+
+console.log('SQS_QUEUE_URL', sqsQueueUrl)
 
 // From sns-pub > sqs -> lambda
 module.exports.consumer = (event, context, callback) => {
-  const sqsQueueUrl = ''
+  console.log('Starting consumer')
   const receiveMessageParams = {
     QueueUrl: sqsQueueUrl
   }
