@@ -1,9 +1,11 @@
 service: lambda-producer
 
+
 custom:
   SNS_ARN: arn:aws:sns:ap-southeast-1:778203360779:poc-demo
 
 provider:
+  deploymentBucket: your-deployment-bucket
   name: aws
   profile: poc-delivery
   region: ap-southeast-1
@@ -17,7 +19,7 @@ provider:
         - ${self:custom.SNS_ARN}
 
 functions:
-  hello:
+  producer:
     handler: handler.producer
     environment:
       SNS_ARN: ${self:custom.SNS_ARN}

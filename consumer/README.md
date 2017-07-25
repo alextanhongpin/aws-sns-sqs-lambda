@@ -31,6 +31,8 @@ $ npm install
 $ serverless deploy
 ```
 
+## Note
+Update your roles in AWS IAM and allow sqs.
 
 ## Features
 
@@ -55,3 +57,4 @@ Always create a license
 8. Kinesis Stream let you specify how many AWS Lambda functions can be run in parallel (one per partition)
 9. Kinesis streams can pass multiple available messages in one AWS lambda function invocation
 10. Lambda will be reading from AWS Kinesis stream, not the Kinesis Stream invoking AWS Lambda
+

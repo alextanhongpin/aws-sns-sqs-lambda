@@ -1,5 +1,6 @@
 service: lambda-consumer
 
+
 custom:
   SQS_QUEUE_URL: https://sqs.ap-southeast-1.amazonaws.com/778203360779/poc-demo
   SQS_ARN: arn:aws:sqs:ap-southeast-1:778203360779:poc-demo
@@ -16,6 +17,7 @@ provider:
   - Effect: Allow
     Action:
       - sqs:*
+      # Refine policy
       # - sqs:DeleteMessage
       # - sqs:ReceiveMessage
     Resource: ${self:custom.SQS_ARN}
@@ -27,8 +29,7 @@ functions:
   hello:
     handler: handler.consumer
     events:
-      # Subscribe to SNS topic. Will run whenever an event is published.
-      # But we do not want to do this, we will publish from SNS -> SQS -> Lambda
+      # Subscribe to SNS topic. Will call the receive message on lambda whenever an event is published to the topic.
       - sns:
           arn: ${self:custom.SNS_ARN}
     environment:
