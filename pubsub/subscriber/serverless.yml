@@ -9,14 +9,15 @@ custom:
 provider:
   name: aws
   runtime: nodejs6.10
-  # profile: poc-delivery
+  profile: poc-delivery
   region: ap-southeast-1
   stage: dev
   deploymentBucket: salle-serverless-deployment
   iamRoleStatements:
   - Effect: Allow
     Action:
-      - sqs:*
+      - sqs:DeleteMessage
+      - sqs:ReceiveMessage
       # Refine policy
       # - sqs:DeleteMessage
       # - sqs:ReceiveMessage
@@ -35,23 +36,24 @@ functions:
     environment:
       SQS_QUEUE_URL: ${self:custom.SQS_QUEUE_URL}
 
-resources:
-  Resources:
-    Messages:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: poc-delivery
-        MessageRetentionPeriod: 1209600
-        VisibilityTimeout: 60
-        RedrivePolicy:
-          deadLetterTargetArn:
-            Fn::GetAtt:
-            - MessagesDeadLetterQueue
-            - Arn
-          maxReceiveCount: 10
+# TODO: Move dead-letter queue creation to setup.js
+# resources:
+#   Resources:
+#     Messages:
+#       Type: AWS::SQS::Queue
+#       Properties:
+#         QueueName: ${self:service}
+#         MessageRetentionPeriod: 1209600
+#         VisibilityTimeout: 60
+#         RedrivePolicy:
+#           deadLetterTargetArn:
+#             Fn::GetAtt:
+#             - MessagesDeadLetterQueue
+#             - Arn
+#           maxReceiveCount: 10
 
-    MessagesDeadLetterQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: poc-delivery-dead-letter-queue
-        MessageRetentionPeriod: 1209500
+#     MessagesDeadLetterQueue:
+#       Type: AWS::SQS::Queue
+#       Properties:
+#         QueueName: ${self:service}-dead-letter-queue
+#         MessageRetentionPeriod: 1209500

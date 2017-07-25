@@ -1,0 +1,24 @@
+service: poc-initiator
+
+
+custom:
+  SNS_ARN: arn:aws:sns:ap-southeast-1:778203360779:Initiator
+
+provider:
+  name: aws
+  profile: poc-delivery
+  region: ap-southeast-1
+  runtime: nodejs6.10
+  deploymentBucket: salle-serverless-deployment
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sns:Publish
+      Resource: 
+        - ${self:custom.SNS_ARN}
+
+functions:
+  initiator:
+    handler: handler.index
+    environment:
+      SNS_ARN: ${self:custom.SNS_ARN}

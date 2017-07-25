@@ -1,0 +1,33 @@
+service: poc-push-notification
+
+custom:
+  SQS_QUEUE_URL: https://sqs.ap-southeast-1.amazonaws.com/778203360779/PushNotification
+  SQS_ARN: arn:aws:sqs:ap-southeast-1:778203360779:PushNotification
+  SNS_ARN: arn:aws:sns:ap-southeast-1:778203360779:PushNotification
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  profile: poc-delivery
+  region: ap-southeast-1
+  stage: dev
+  deploymentBucket: salle-serverless-deployment
+  iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - sqs:DeleteMessage
+      - sqs:ReceiveMessage
+    Resource: ${self:custom.SQS_ARN}
+    Condition:
+      ArnEquals:
+        aws:SourceArn: ${self:custom.SNS_ARN}
+
+functions:
+  pushNotification:
+    handler: handler.index
+    events:
+      # Subscribe to SNS topic. Will call the receive message on lambda whenever an event is published to the topic.
+      - sns:
+          arn: ${self:custom.SNS_ARN}
+    environment:
+      SQS_QUEUE_URL: ${self:custom.SQS_QUEUE_URL}

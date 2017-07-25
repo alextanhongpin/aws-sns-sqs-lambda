@@ -8,10 +8,11 @@ const config = {
 }
 
 // Environment Variables
-const SNS_TOPIC = 'poc-demo'
-const QUEUE_NAME = 'poc-demo'
+const SNS_TOPIC = 'Initiator'
+const QUEUE_NAME = 'initiator' // SQS Queue Name
 const AWS_REGION = 'ap-southeast-1'
 const AWS_PROFILE = 'poc-delivery'
+const OUTPUT_FILE = `${SNS_TOPIC}-config.json`
 
 // Configure AWS
 AWS.config.update({
@@ -112,7 +113,11 @@ function setQueueAttr (config) {
       Principal: {
         AWS: '*'
       },
-      Action: 'SQS:ReceiveMessage',
+      // Must have both send and receive message
+      Action: [
+        'SQS:ReceiveMessage',
+        'SQS:SendMessage'
+      ],
       Resource: sqsArn,
       Condition: {
         ArnEquals: {
@@ -127,7 +132,15 @@ function setQueueAttr (config) {
     sqs.setQueueAttributes({
       QueueUrl: queueUrl,
       Attributes: {
-        Policy: JSON.stringify(attributes)
+        Policy: JSON.stringify(attributes),
+        MessageRetentionPeriod: 1209600, // 14 days, defaults to  345600 (4 days).
+        VisibilityTimeout: 60, // Defaults to 30
+        RedrivePolicy: JSON.stringify({
+          deadLetterTargetArn: `${QUEUE_NAME}-dead-letter-queue`,
+          // Is this the right amount?
+          maxReceiveCount: 10
+        }),
+        ReceiveMessageWaitTimeSeconds: 20
       }
     }, (err, result) => {
       if (err) {
@@ -143,7 +156,7 @@ function setQueueAttr (config) {
 
 function writeConfigFile (config) {
   return new Promise((resolve, reject) => {
-    fs.writeFile('config.json', JSON.stringify(config, null, 4), (err) => {
+    fs.writeFile(OUTPUT_FILE, JSON.stringify(config, null, 4), (err) => {
       if (err) {
         reject(err)
       } else {

@@ -10,15 +10,21 @@ const sns = new AWS.SNS()
 
 console.log(process.env.SNS_ARN)
 
-module.exports.producer = (event, context, callback) => {
+module.exports.index = (event, context, callback) => {
   const params = {
     Message: JSON.stringify({
-      message: 'Hello world'
+      message: 'POC Initiator',
+      integerData: 1,
+      booleanData: false,
+      stringData: 'Hello world',
+      arrayData: [1, 2, 3]
     }),
-    Subject: 'Text SNS from Lambda',
+    Subject: 'POC Initiator',
     TopicArn: process.env.SNS_ARN
   }
 
   console.log('Publishing to SNS...')
-  sns.publish(params, callback)
+  Array(10).fill(0).forEach(() => {
+    sns.publish(params, callback)
+  })
 }
