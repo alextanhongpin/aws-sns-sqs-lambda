@@ -1,5 +1,0 @@
-{
-    "TopicArn": "arn:aws:sns:ap-southeast-1:778203360779:poc-demo",
-    "QueueUrl": "https://sqs.ap-southeast-1.amazonaws.com/778203360779/poc-demo",
-    "QueueArn": "arn:aws:sqs:ap-southeast-1:778203360779:poc-demo"
-}
