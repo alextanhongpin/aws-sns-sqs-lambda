@@ -9,8 +9,8 @@ const config = {
 }
 
 // Environment Variables
-const SNS_TOPIC = 'Email' // Format (Capitalized)
-const QUEUE_NAME = 'email' // SQS Queue Name
+const SNS_TOPIC = 'ContentRouter' // Format (Capitalized)
+const QUEUE_NAME = 'content-router' // SQS Queue Name
 const AWS_REGION = 'ap-southeast-1'
 const AWS_PROFILE = 'poc-delivery'
 const OUTPUT_FILE = `${SNS_TOPIC}-config.json`

@@ -24,7 +24,7 @@ module.exports.index = (event, context, callback) => {
   }
 
   console.log('Publishing to SNS...')
-  Array(10).fill(0).forEach(() => {
+  Array(100).fill(0).forEach(() => {
     sns.publish(params, callback)
   })
 }

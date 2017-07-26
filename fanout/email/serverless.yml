@@ -1,14 +1,15 @@
 service: poc-email
 
 custom:
-  SQS_QUEUE_URL: https://sqs.ap-southeast-1.amazonaws.com/778203360779/Email
-  SQS_ARN: arn:aws:sqs:ap-southeast-1:778203360779:Email
+  SQS_QUEUE_URL: https://sqs.ap-southeast-1.amazonaws.com/778203360779/email
+  SQS_ARN: arn:aws:sqs:ap-southeast-1:778203360779:email
   SNS_ARN: arn:aws:sns:ap-southeast-1:778203360779:Email
 
 provider:
   name: aws
   runtime: nodejs6.10
   profile: poc-delivery
+  memorySize: 128
   region: ap-southeast-1
   stage: dev
   deploymentBucket: salle-serverless-deployment
