@@ -1,0 +1,7 @@
+{
+    "TopicArn": "arn:aws:sns:ap-southeast-1:778203360779:ContentRouter",
+    "QueueUrl": "https://sqs.ap-southeast-1.amazonaws.com/778203360779/content-router",
+    "DeadLetterQueueUrl": "https://sqs.ap-southeast-1.amazonaws.com/778203360779/content-router-dead-letter-queue",
+    "QueueArn": "arn:aws:sqs:ap-southeast-1:778203360779:content-router",
+    "DeadLetterQueueArn": "arn:aws:sqs:ap-southeast-1:778203360779:content-router-dead-letter-queue"
+}

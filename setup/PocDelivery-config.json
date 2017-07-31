@@ -1,0 +1,7 @@
+{
+    "TopicArn": "arn:aws:sns:ap-southeast-1:778203360779:PocDelivery",
+    "QueueUrl": "https://sqs.ap-southeast-1.amazonaws.com/778203360779/poc-delivery",
+    "DeadLetterQueueUrl": "https://sqs.ap-southeast-1.amazonaws.com/778203360779/poc-delivery-dead-letter-queue",
+    "QueueArn": "arn:aws:sqs:ap-southeast-1:778203360779:poc-delivery",
+    "DeadLetterQueueArn": "arn:aws:sqs:ap-southeast-1:778203360779:poc-delivery-dead-letter-queue"
+}

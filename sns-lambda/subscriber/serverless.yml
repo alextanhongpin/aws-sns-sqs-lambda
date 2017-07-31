@@ -1,0 +1,30 @@
+service: sns-poc-subscriber
+
+
+custom:
+  SNS_ARN: arn:aws:sns:ap-southeast-1:778203360779:sns-poc
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  profile: poc-delivery
+  region: ap-southeast-1
+  stage: dev
+  deploymentBucket: salle-serverless-deployment
+
+functions:
+  hello:
+    handler: handler.consumer
+    events:
+      # Subscribe to SNS topic. Will call the receive message on lambda whenever an event is published to the topic.
+      - sns:
+          arn: ${self:custom.SNS_ARN}
+
+# TODO: Move dead-letter queue creation to setup.js
+resources:
+  Resources:
+    MessagesDeadLetterQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:service}-dead-letter-queue
+        MessageRetentionPeriod: 1209500

@@ -27,13 +27,15 @@ module.exports.consumer = (event, context, callback) => {
       return callback(err)
     }
     if (data && data.Messages && data.Messages.length > 0) {
-          // Do something with data here
-      var deleteMessageParams = {
+    // Do something with data here
+      const deleteMessageParams = {
         QueueUrl: sqsQueueUrl,
         ReceiptHandle: data.Messages[0].ReceiptHandle
       }
       console.log(data)
-      sqs.deleteMessage(deleteMessageParams, callback)
+      setTimeout(() => {
+        sqs.deleteMessage(deleteMessageParams, callback)
+      }, 1000)
     }
   })
 }

@@ -2,9 +2,9 @@ service: lambda-consumer
 
 
 custom:
-  SQS_QUEUE_URL: https://sqs.ap-southeast-1.amazonaws.com/778203360779/poc-demo
-  SQS_ARN: arn:aws:sqs:ap-southeast-1:778203360779:poc-demo
-  SNS_ARN: arn:aws:sns:ap-southeast-1:778203360779:poc-demo
+  SQS_QUEUE_URL: https://sqs.ap-southeast-1.amazonaws.com/778203360779/poc-delivery
+  SQS_ARN: arn:aws:sqs:ap-southeast-1:778203360779:poc-delivery
+  SNS_ARN: arn:aws:sns:ap-southeast-1:778203360779:PocDelivery
 
 provider:
   name: aws
